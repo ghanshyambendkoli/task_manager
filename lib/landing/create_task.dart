@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:task_manager/landing/landing_page.dart';
+import 'package:task_manager/localDB/database_helper.dart';
 import 'package:task_manager/model/task_model.dart';
 
 class CreateTask extends StatefulWidget {
@@ -12,6 +15,7 @@ class CreateTask extends StatefulWidget {
 class _CreateTaskState extends State<CreateTask> {
   final TextEditingController _taskController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _categoryController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -68,15 +72,41 @@ class _CreateTaskState extends State<CreateTask> {
                      
                 }
           ),
+          Container(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: TextFormField(
+                    controller: _categoryController,
+                   
+                    validator: (value) {
+                   if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
+                 }
+                    },
+                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),  
+                                      labelText: 'Category',
+                                    ),
+                                  onSaved: (String? value) {
+                                    
+                                  },
+                                ),
+                ),
           const SizedBox(height: 40,),
           SizedBox(
               width: MediaQuery.of(context).size.width,
               height: 50,
               child: ElevatedButton(onPressed: () async {
-               
-                
+               SqliteDatabaseHelper _databaseHelper = SqliteDatabaseHelper();
+             var msg =  await _databaseHelper.insertTask(Task(
+                name: _taskController.text,
+                dueDate: _dateController.text,
+                category: _categoryController.text
+               ));
+               log(msg.toString());
+               if(msg!=0){
+                Navigator.pop(context);
+               }           
     }
-  
               , child:const Text("ADD TASK")))
             ],
           ),
